@@ -1,4 +1,4 @@
-import React, { useState } from "react"; 
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Carrusel from "./carrusel";
 import CatMenuClientes from "./catMenuClientes";
@@ -6,7 +6,7 @@ import NavBar from "./NavBar";
 import fondo from './res/backgroungl.png';
 
 const InicioCliente = () => {
-  const [selectedCategory, setSelectedCategory] = useState(null); 
+  const [selectedCategory, setSelectedCategory] = useState(null);
   const navigate = useNavigate(); // Hook para redirigir
 
   const handleCategoryClick = (categoria) => {
@@ -16,8 +16,17 @@ const InicioCliente = () => {
   };
 
   return (
-    <div style={{ backgroundImage: `url(${fondo})`, backgroundSize: 'auto 100%', backgroundRepeat: 'repeat-x', width: '100vw', height: '100vh', overflow: 'auto' }}>
-      <NavBar />
+    <div
+      style={{
+        backgroundImage: `url(${fondo})`,
+        backgroundSize: 'cover', // O 'contain' dependiendo del efecto deseado
+        backgroundRepeat: 'no-repeat',
+        width: '100%',
+        height: '100vh',
+        overflowX: 'hidden', // Evita scroll horizontal
+        overflowY: 'auto',
+      }}
+    >      <NavBar />
       <Carrusel />
       <h3
         style={{

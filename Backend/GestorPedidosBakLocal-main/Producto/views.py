@@ -535,7 +535,8 @@ class ListaCategoriasConProductos(View):
                         "precio_unitario": float(producto.preciounitario),
                         "puntos": float(producto.puntosp),
                         "estado": producto.sestado,
-                        "imagenp": imagen_base64  # Devuelve la imagen en base64 o None
+                        "imagenp": imagen_base64,  # Devuelve la imagen en base64 o None
+                        "impuesto":producto.calcular_impuestos()
                     })
                 
                 resultado.append({

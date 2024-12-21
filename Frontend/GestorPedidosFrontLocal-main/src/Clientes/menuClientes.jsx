@@ -1,4 +1,4 @@
-import React, { useState } from "react"; 
+import React, { useState } from "react";
 import NavBar from "./NavBar";
 import fondo from './res/backgroungl.png';
 import CatMenuClientes from "./catMenuClientes";
@@ -8,7 +8,7 @@ import { useParams } from "react-router-dom";
 
 
 const MenuCliente = () => {
-  const { categoryId } = useParams(); 
+  const { categoryId } = useParams();
   const [selectedCategory, setSelectedCategory] = useState(null); // Estado para la categoría seleccionada
 
   // Función para actualizar la categoría seleccionada
@@ -18,13 +18,14 @@ const MenuCliente = () => {
   };
 
   return (
-    <div style={{ 
-      backgroundImage: `url(${fondo})`, 
-      backgroundSize: 'auto 100%', 
-      backgroundRepeat: 'repeat-x', 
-      width: '100vw', 
-      height: '100vh', 
-      overflow: 'auto' 
+    <div style={{
+      backgroundImage: `url(${fondo})`,
+      backgroundSize: 'auto 100%',
+      backgroundRepeat: 'repeat-x',
+      width: '100vw',
+      height: '100vh',
+      overflowX: 'hidden', // Evita scroll horizontal
+      overflowY: 'auto',
     }}>
       <NavBar />
       <h3
@@ -46,7 +47,7 @@ const MenuCliente = () => {
         <Col xs={24} sm={20} style={{ height: '100vh', overflowY: 'auto' }}>
           <div style={{ height: 'calc(100vh - 60px)', overflowY: 'auto' }}>
             {/* Pasamos la categoría seleccionada a ProductosClientes */}
-            <ProductosClientes selectedCategory={selectedCategory} categoryid={categoryId}/>
+            <ProductosClientes selectedCategory={selectedCategory} categoryid={categoryId} />
           </div>
         </Col>
       </Row>
