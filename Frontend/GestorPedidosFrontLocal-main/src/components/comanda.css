@@ -1,0 +1,31 @@
+.content {
+    margin: 0;
+    padding: 0;
+    background: url('./res/background2.png') repeat; /* Ajusta la imagen para cubrir todo el fondo */
+    background-repeat: repeat; /* Repite la imagen en ambas direcciones */
+    height: 100%;/* Esto establecerá la altura al 100% de la altura visible del viewport */
+    background-size: 50%;
+    overflow: hidden;
+}
+.carrito {
+    .ant-drawer-body {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    background: url('./res/background2.png') repeat; /* Ajusta la imagen para cubrir todo el fondo */
+    background-repeat: repeat; /* Repite la imagen en ambas direcciones */
+    height: 100%;/* Esto establecerá la altura al 100% de la altura visible del viewport */
+    background-size: 100%;
+    overflow: hidden;
+    }
+}
+.contentlight {
+    margin: 0;
+    padding: 0;
+    background: url('./res/backgroungl.png') repeat; /* Ajusta la imagen para cubrir todo el fondo */
+    background-repeat: repeat; /* Repite la imagen en ambas direcciones */
+    height: 100%;/* Esto establecerá la altura al 100% de la altura visible del viewport */
+    background-size: 50%;
+    overflow: hidden;
+}
+ 

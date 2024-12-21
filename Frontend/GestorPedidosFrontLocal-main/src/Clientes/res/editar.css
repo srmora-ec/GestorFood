@@ -1,0 +1,8 @@
+.formularioContainer {   
+    background: url('../../components/res/background2.png') repeat; /* Ajusta la imagen para cubrir todo el fondo */
+    background-repeat: repeat; /* Repite la imagen en ambas direcciones */
+    background-size: 100%;
+    border-Radius: "5px";
+    padding: "100px";
+    margin-Top: "30px",
+}
