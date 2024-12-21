@@ -21,12 +21,13 @@ import ValidarPedido from "./Validarpedido";
 import Carrusel from "./carrusel";
 import { CartContext } from "../context/CarritoContext";
 import { RecompensaContext } from "../context/RecompensaContext";
-import carrito from './res/carrito.png';
+import carritoimg from './res/carrito.png';
 import EditarUser from "./EditarUser";
 import ListProductos from "./ListaProductos";
 import Reclamar from "./ReclamarRecompensas";
 import Reserva from "./Reserva";
 import API_URL from '../config';
+import CarritoCliente from "./CarritoCliente ";
 const NavBar = () => {
   const navigate = useNavigate(); // Hook para redirigir
   const { cart, setCart, totalPoints2, calcularTotalPoints } = useContext(CartContext);
@@ -36,6 +37,19 @@ const NavBar = () => {
     const storedComponente = localStorage.getItem("ComponenteSeleccionado");
     return storedComponente || "Carrusel";
   });
+  const [carrito, setCarrito] = useState(() => {
+    const savedCarrito = localStorage.getItem("carrito");
+    return savedCarrito ? JSON.parse(savedCarrito) : {};
+  });
+  const [visible, setVisible] = useState(false);
+
+  const mostrarCarrito = () => {
+    setVisible(true);
+  };
+
+  const cerrarCarrito = () => {
+    setVisible(false);
+  };
   // const [empresaInfo, setEmpresaInfo] = useState(null);
   const [nombreEmpresa, setNombre] = useState(null);
   const [Logeado, setlogeado] = useState(null);
@@ -156,7 +170,10 @@ const NavBar = () => {
   };
   // const [userData, setUserData] = useState(null);
   // const id_cuenta = localStorage.getItem("id_cuenta");
-
+// Guardar carrito en localStorage cada vez que cambie
+    useEffect(() => {
+        localStorage.setItem("carrito", JSON.stringify(carrito));
+    }, [carrito]);
   useEffect(() => {
     obtenerInformacionEmpresa();
     // ObtenerUsuario();
@@ -164,14 +181,14 @@ const NavBar = () => {
 
   return (
     <>
-    
+
       <link rel="preconnect" href="https://fonts.googleapis.com" />
       <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
       <link
         href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Merienda:wght@300..900&display=swap"
         rel="stylesheet"
       />
-      
+
       <Row style={{ background: "black", color: "white", height: "25px" }}>
         <Col
           md={12}
@@ -213,22 +230,22 @@ const NavBar = () => {
                 MENU
               </Nav.Link>
               <Link
-                onClick={() => MostrarComponente("Carrito")}
                 style={{
                   textDecoration: "none",
                   color: "inherit",
                   fontSize: "18px",
                 }}
+                onClick={mostrarCarrito} 
 
               >
                 {" "}
 
-                  <img
-                    src={carrito}
-                    alt="Logo"
-                    width="30px"
-                    style={{margin:'0px 10px'}}
-                  />
+                <img
+                  src={carritoimg}
+                  alt="carrito"
+                  width="30px"
+                  style={{ margin: '0px 10px' }}
+                />
               </Link>
               {Logeado && (
                 <NavDropdown
@@ -330,7 +347,13 @@ const NavBar = () => {
           <RegistroForm onGoBackToLogin={RegresarAlLogin} />
         </Modal.Body>
       </Modal>
-
+      
+      <CarritoCliente
+        carrito={carrito}
+        setCarrito={setCarrito}
+        visible={visible}
+        onClose={cerrarCarrito}
+      />
     </>
   );
 };

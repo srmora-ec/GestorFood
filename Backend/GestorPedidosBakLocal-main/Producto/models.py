@@ -1,5 +1,6 @@
 from django.db import models
 from Empresa.models import Sucursales, Horariossemanales
+from decimal import Decimal
 
 class TiposProductos(models.Model):
     id_tipoproducto = models.AutoField(primary_key=True)
@@ -38,6 +39,42 @@ class Producto(models.Model):
     class Meta:
         managed = True
         db_table = 'producto'
+    def calcular_impuestos(self):
+        # Precio unitario con todos los impuestos aplicados
+        precio_base = self.preciounitario
+
+        # Factor total de impuestos
+        impuesto_factor = Decimal(1.0)  # Usar Decimal aquí en lugar de float
+        if self.iva == '1':
+            impuesto_factor *= Decimal(1.15)  # IVA 15%
+        if self.ice == '1':
+            impuesto_factor *= Decimal(1.50)  # ICE 50%
+        if self.irbpnr == '1':
+            impuesto_factor *= Decimal(1.10)  # IRBPNR 10%
+
+        # Calcular el precio base dividiendo el precio unitario entre el factor total de impuestos
+        precio_base_sin_impuestos = precio_base / impuesto_factor
+
+        # Calcular los impuestos individuales
+        impuestos = {
+            'iva': Decimal(0),
+            'ice': Decimal(0),
+            'irbpnr': Decimal(0)
+        }
+
+        if self.iva == '1':
+            iva_calculado = precio_base - (precio_base_sin_impuestos * Decimal(1.15))
+            impuestos['iva'] = round(iva_calculado, 2)
+
+        if self.ice == '1':
+            ice_calculado = precio_base - (precio_base_sin_impuestos * Decimal(1.50))
+            impuestos['ice'] = round(ice_calculado, 2)
+
+        if self.irbpnr == '1':
+            irbpnr_calculado = precio_base - (precio_base_sin_impuestos * Decimal(1.10))
+            impuestos['irbpnr'] = round(irbpnr_calculado, 2)
+
+        return impuestos
 
 class UnidadMedida(models.Model):
     idum = models.AutoField(primary_key=True)

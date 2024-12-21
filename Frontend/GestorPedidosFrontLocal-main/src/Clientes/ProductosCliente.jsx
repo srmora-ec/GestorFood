@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
-import { Row, Col, notification } from 'antd'; // Importa notification para mostrar notificaciones
+import { Row, Col, notification } from 'antd'; 
 import API_URL from '../config.js';
+import CarritoCliente from "./CarritoCliente .jsx";
 
 const ProductosClientes = ({ selectedCategory, categoryid }) => {
     const [categorias, setCategorias] = useState([]);
@@ -8,6 +9,16 @@ const ProductosClientes = ({ selectedCategory, categoryid }) => {
         const savedCarrito = localStorage.getItem("carrito");
         return savedCarrito ? JSON.parse(savedCarrito) : {};
     });
+    const [visible, setVisible] = useState(false);
+
+    const mostrarCarrito = () => {
+        setVisible(true);
+    };
+
+    const cerrarCarrito = () => {
+        setVisible(false);
+    };
+
     const categoryRefs = useRef({});
 
     // Guardar carrito en localStorage cada vez que cambie
@@ -43,14 +54,15 @@ const ProductosClientes = ({ selectedCategory, categoryid }) => {
 
     // Agregar producto al carrito
     const agregarAlCarrito = (producto) => {
+        notification.destroy();
         const nuevoCarrito = { ...carrito };
         if (!nuevoCarrito[producto.id_producto]) {
             nuevoCarrito[producto.id_producto] = { ...producto, cantidad: 1 };
             setCarrito(nuevoCarrito);
-
+            
             notification.success({
                 message: "Producto agregado",
-                boxShadow:'1px 4px 8px 1px rgba(0, 0, 0, 0.5)',
+                boxShadow: '1px 4px 8px 1px rgba(0, 0, 0, 0.5)',
                 borderRadius: '8px',
                 description: (
                     <div
@@ -58,27 +70,11 @@ const ProductosClientes = ({ selectedCategory, categoryid }) => {
                             display: 'flex',
                             flexDirection: 'row',
                             backgroundColor: 'white',
-                            // borderRadius: '8px',
-                            // boxShadow: '1px 4px 8px 1px rgba(0, 0, 0, 0.5)',
                             overflow: 'hidden',
                             transition: 'all 0.3s ease',
                             height: '100%',
                         }}
                     >
-                        {/* <img
-                            src={`data:image/jpeg;base64,${producto.imagenp}`}
-                            alt={producto.nombre_producto}
-                            style={{ width: "50px", height: "50px", marginRight: "10px" }}
-                        />
-                        <div>
-                            <p><strong>{producto.nombre_producto}</strong></p>
-                            <p>Precio: ${producto.precio_unitario}</p>
-                        </div>
-
- */}
-
-
-
                         <div
                             style={{
                                 width: '50%',
@@ -110,6 +106,10 @@ const ProductosClientes = ({ selectedCategory, categoryid }) => {
                                 Precio: ${producto.precio_unitario}
                             </p>
                             <button
+                                onClick={() => {
+                                    notification.destroy();
+                                    mostrarCarrito();
+                                }}
                                 style={{
                                     width: '100%',
                                     padding: '10px',
@@ -121,15 +121,12 @@ const ProductosClientes = ({ selectedCategory, categoryid }) => {
                                     fontSize: '14px',
                                     fontWeight: 'bold',
                                 }}
-
                                 onMouseEnter={(e) => e.target.style.backgroundColor = 'black'}
                                 onMouseLeave={(e) => e.target.style.backgroundColor = '#A80000'}
-
                             >
                                 VER CARRITO
                             </button>
                         </div>
-
                     </div>
                 ),
             });
@@ -147,6 +144,19 @@ const ProductosClientes = ({ selectedCategory, categoryid }) => {
             setCarrito(nuevoCarrito);
         }
     };
+
+    // Actualizar el carrito cada 3 segundos
+    useEffect(() => {
+        const interval = setInterval(() => {
+            const savedCarrito = localStorage.getItem("carrito");
+            if (savedCarrito) {
+                setCarrito(JSON.parse(savedCarrito));
+            }
+        }, 3000);
+
+        // Limpiar el intervalo al desmontar el componente
+        return () => clearInterval(interval);
+    }, []);
 
     return (
         <div style={{ padding: '25px', backgroundColor: "white", borderRadius: "1%" }}>
@@ -260,10 +270,8 @@ const ProductosClientes = ({ selectedCategory, categoryid }) => {
                                                             fontSize: '14px',
                                                             fontWeight: 'bold',
                                                         }}
-
                                                         onMouseEnter={(e) => e.target.style.backgroundColor = '#333'}
                                                         onMouseLeave={(e) => e.target.style.backgroundColor = '#4CAF50'}
-
                                                     >
                                                         Agregar
                                                     </button>
@@ -279,6 +287,12 @@ const ProductosClientes = ({ selectedCategory, categoryid }) => {
                     </div>
                 ))
             )}
+            <CarritoCliente
+                carrito={carrito}
+                setCarrito={setCarrito}
+                visible={visible}
+                onClose={cerrarCarrito}
+            />
         </div>
     );
 };
