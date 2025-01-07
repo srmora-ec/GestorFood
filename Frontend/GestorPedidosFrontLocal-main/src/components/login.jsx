@@ -6,7 +6,7 @@ const LoginForm = ({ onLogin }) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch(API_URL +"/Login/rol/", {
+        const response = await fetch(API_URL + "/Login/rol/", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -53,19 +53,19 @@ const LoginForm = ({ onLogin }) => {
           password: values.password,
         }),
       });
-  
+
       if (!tokenResponse.ok) {
         console.error('Error al obtener el token');
         return;
       }
-  
+
       const tokenData = await tokenResponse.json();
       const token = tokenData.access;
-  
+
       // Almacenar el token en localStorage
       localStorage.setItem('token', token);
       console.log('Token actual:', token);
-  
+
       // Segunda solicitud: obtener el rol
       const roleResponse = await fetch(API_URL + '/Login/rol/', {
         method: 'POST',
@@ -76,11 +76,11 @@ const LoginForm = ({ onLogin }) => {
           token, // Usar el token directamente
         }),
       });
-  
+
       if (roleResponse.ok) {
         const roleData = await roleResponse.json();
         const rol = roleData.rol;
-  
+
         // Redirigir según el rol
         if (rol === 'A') {
           navigate('/home');
@@ -88,6 +88,8 @@ const LoginForm = ({ onLogin }) => {
           navigate('/homemesero');
         } else if (rol === 'X') {
           navigate('/cocina');
+        } else if (rol === 'D') {
+          navigate('/homemotorizado');
         }
       } else {
         console.error('Error al obtener el rol');
@@ -97,56 +99,56 @@ const LoginForm = ({ onLogin }) => {
       console.error('Error:', error);
     }
   };
-  
-      // const response = await fetch(
-      //   API_URL +"/Login/iniciar_sesion/",
-      //   {
-      //     method: "POST",
-      //     headers: {
-      //       "Content-Type": "application/json",
-      //     },
-      //     body: JSON.stringify({
-      //       nombreusuario: values.username,
-      //       contrasenia: values.password,
-      //     }),
-      //   }
-      // );
 
-      // const data = await response.json();
-      // console.log(data); // Verifica si el token está presente en la respuesta
+  // const response = await fetch(
+  //   API_URL +"/Login/iniciar_sesion/",
+  //   {
+  //     method: "POST",
+  //     headers: {
+  //       "Content-Type": "application/json",
+  //     },
+  //     body: JSON.stringify({
+  //       nombreusuario: values.username,
+  //       contrasenia: values.password,
+  //     }),
+  //   }
+  // );
 
-      // if (response.ok) {
-      //   const { token, nombreusuario, id_cuenta, rol } = data;
-      //   console.log("Token almacenado:", token);
-      //   console.log("Nombre de usuario almacenado:", nombreusuario);
-      //   console.log("ID de cuenta almacenado:", id_cuenta);
+  // const data = await response.json();
+  // console.log(data); // Verifica si el token está presente en la respuesta
+
+  // if (response.ok) {
+  //   const { token, nombreusuario, id_cuenta, rol } = data;
+  //   console.log("Token almacenado:", token);
+  //   console.log("Nombre de usuario almacenado:", nombreusuario);
+  //   console.log("ID de cuenta almacenado:", id_cuenta);
 
 
-      //   localStorage.setItem("username", nombreusuario);
-      //   localStorage.setItem("id_cuenta", id_cuenta);
-        
-      //   // Después de que el usuario ha iniciado sesión, realiza la redirección
-      //   onLogin(data);
-      //   // Después de que el usuario ha iniciado sesión, realiza la redirección
-        
-      //   if (rol === "A") {
-      //       //console.log("Aqui aun no intentá imprimir");
-            
-      //       window.location.href = "/home";
-            
-      //   } else if (rol === "M") {
-      //     navigate("/homemesero"); // Utiliza navigate para redirigir a la ruta deseada
-      //   } else if (rol === "X") {
-      //     navigate("/cocina"); // Utiliza navigate para redirigir a la ruta deseada
-      //   }
-      // } else {        // Manejar errores de inicio de sesión
-      //   console.error("Error en inicio de sesión:", data.mensaje);
-      //   message.error(data.mensaje);
+  //   localStorage.setItem("username", nombreusuario);
+  //   localStorage.setItem("id_cuenta", id_cuenta);
+
+  //   // Después de que el usuario ha iniciado sesión, realiza la redirección
+  //   onLogin(data);
+  //   // Después de que el usuario ha iniciado sesión, realiza la redirección
+
+  //   if (rol === "A") {
+  //       //console.log("Aqui aun no intentá imprimir");
+
+  //       window.location.href = "/home";
+
+  //   } else if (rol === "M") {
+  //     navigate("/homemesero"); // Utiliza navigate para redirigir a la ruta deseada
+  //   } else if (rol === "X") {
+  //     navigate("/cocina"); // Utiliza navigate para redirigir a la ruta deseada
+  //   }
+  // } else {        // Manejar errores de inicio de sesión
+  //   console.error("Error en inicio de sesión:", data.mensaje);
+  //   message.error(data.mensaje);
   //     // }
   //   } catch (error) {
   //     console.error("Error en la solicitud de inicio de sesión:", error);
   //   }
-    
+
   // };
 
   const onFinishFailed = (errorInfo) => {

@@ -13,7 +13,7 @@ class Proveedores(models.Model):
     sestado = models.CharField(max_length=1, choices=[('0', '0'), ('1', '1')], db_column='sestado')
 
     class Meta:
-        managed = False
+        managed = True
         db_table = 'proveedores'
 
 class Pedidosproveedor(models.Model):
@@ -26,7 +26,7 @@ class Pedidosproveedor(models.Model):
     observacion = models.CharField(max_length=500, blank=True, null=True)
 
     class Meta:
-        managed = False
+        managed = True
         db_table = 'pedidosproveedor' 
 
 class Detallepedidoproveedor(models.Model):
@@ -39,6 +39,6 @@ class Detallepedidoproveedor(models.Model):
     id_um = models.ForeignKey(UnidadMedida, models.DO_NOTHING, db_column='id_um', blank=True, null=True)
 
     class Meta:
-        managed = False
+        managed = True
         db_table = 'detallepedidoproveedor'
 

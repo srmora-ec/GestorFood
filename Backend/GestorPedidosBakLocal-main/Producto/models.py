@@ -43,36 +43,24 @@ class Producto(models.Model):
         # Precio unitario con todos los impuestos aplicados
         precio_base = self.preciounitario
 
-        # Factor total de impuestos
-        impuesto_factor = Decimal(1.0)  # Usar Decimal aquí en lugar de float
-        if self.iva == '1':
-            impuesto_factor *= Decimal(1.15)  # IVA 15%
-        if self.ice == '1':
-            impuesto_factor *= Decimal(1.50)  # ICE 50%
-        if self.irbpnr == '1':
-            impuesto_factor *= Decimal(1.10)  # IRBPNR 10%
+        # Factores de impuestos en un diccionario
+        impuestos_factor = {
+            'iva': Decimal(1.15) if self.iva else Decimal(1),
+            'ice': Decimal(1.50) if self.ice else Decimal(1),
+            'irbpnr': Decimal(1.10) if self.irbpnr else Decimal(1)
+        }
 
-        # Calcular el precio base dividiendo el precio unitario entre el factor total de impuestos
+        # Factor total de impuestos
+        impuesto_factor = impuestos_factor['iva'] * impuestos_factor['ice'] * impuestos_factor['irbpnr']
+
+        # Calcular el precio base sin impuestos
         precio_base_sin_impuestos = precio_base / impuesto_factor
 
         # Calcular los impuestos individuales
-        impuestos = {
-            'iva': Decimal(0),
-            'ice': Decimal(0),
-            'irbpnr': Decimal(0)
-        }
-
-        if self.iva == '1':
-            iva_calculado = precio_base - (precio_base_sin_impuestos * Decimal(1.15))
-            impuestos['iva'] = round(iva_calculado, 2)
-
-        if self.ice == '1':
-            ice_calculado = precio_base - (precio_base_sin_impuestos * Decimal(1.50))
-            impuestos['ice'] = round(ice_calculado, 2)
-
-        if self.irbpnr == '1':
-            irbpnr_calculado = precio_base - (precio_base_sin_impuestos * Decimal(1.10))
-            impuestos['irbpnr'] = round(irbpnr_calculado, 2)
+        impuestos = {}
+        for impuesto, factor in impuestos_factor.items():
+            if factor != Decimal(1):
+                impuestos[impuesto] = round(precio_base * (factor - 1), 2)
 
         return impuestos
 

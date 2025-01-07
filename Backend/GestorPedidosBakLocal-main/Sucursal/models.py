@@ -26,6 +26,6 @@
 #     id_cuenta = models.ForeignKey(Cuenta, on_delete=models.CASCADE, db_column='id_cuenta')
 
 #     class Meta: 
-#         managed = False
+#         managed = True
 #         db_table = 'sucursales'
 

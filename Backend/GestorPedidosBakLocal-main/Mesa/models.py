@@ -15,7 +15,7 @@ class Mesas(models.Model):
     sestado = models.CharField(max_length=1)
 
     class Meta:
-        managed = False
+        managed = True
         db_table = 'mesas'
 
 
@@ -31,5 +31,5 @@ class Reservaciones(models.Model):
     estado = models.CharField(max_length=1, choices=ESTADO_CHOICES)
 
     class Meta:
-        managed = False
+        managed = True
         db_table = 'reservaciones'

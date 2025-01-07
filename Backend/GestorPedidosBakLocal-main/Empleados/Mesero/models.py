@@ -42,7 +42,7 @@ class Pedidos(models.Model):
     id_Sucursal= models.ForeignKey(Sucursales, models.DO_NOTHING, db_column='id_sucursal', null=True)
 
     class Meta:
-        managed = False
+        managed = True
         db_table = 'pedidos'
 
 
@@ -53,7 +53,7 @@ class Pedidosmesa(models.Model):
     id_pedido = models.ForeignKey(Pedidos, models.DO_NOTHING, db_column='id_pedido')
 
     class Meta:
-        managed = False
+        managed = True
         db_table = 'pedidosmesa'
 
 
@@ -63,13 +63,13 @@ class Detallepedidos(models.Model):
     id_producto = models.ForeignKey(Producto, models.DO_NOTHING, db_column='id_producto', blank=True, null=True)
     id_combo = models.ForeignKey(Combo, models.DO_NOTHING, db_column='id_combo', blank=True, null=True)
     #id_promocion = models.ForeignKey(Promociones, models.DO_NOTHING, db_column='id_promocion', blank=True, null=True)
-    cantidad = models.DecimalField(max_digits=65535, decimal_places=65535)
+    cantidad = models.DecimalField(max_digits=12, decimal_places=2)
     precio_unitario = models.DecimalField(max_digits=9, decimal_places=2, blank=True, null=True)
     impuesto = models.DecimalField(max_digits=9, decimal_places=2, blank=True, null=True)
     descuento = models.DecimalField(max_digits=9, decimal_places=2, blank=True, null=True)
 
     class Meta:
-        managed = False
+        managed = True
         db_table = 'detallepedidos'
 
 class Factura(models.Model):
@@ -91,7 +91,7 @@ class Factura(models.Model):
     id_punto_facturacion = models.ForeignKey(Puntofacturacion, models.DO_NOTHING, db_column='id_punto_facturacion', blank=True, null=True)
 
     class Meta:
-        managed = False
+        managed = True
         db_table = 'factura'
 
 
@@ -107,7 +107,7 @@ class DetalleFactura(models.Model):
     valor = models.DecimalField(max_digits=10, decimal_places=2)
 
     class Meta:
-        managed = False
+        managed = True
         db_table = 'detallefactura'
 
 
@@ -119,7 +119,7 @@ class NotaCredito(models.Model):
     estado = models.CharField(max_length=1, choices=[('A', 'A'), ('C', 'C')])
 
     class Meta:
-        managed = False
+        managed = True
         db_table = 'notacredito'
 
 

@@ -10,6 +10,6 @@ class ReversionMovimientoInventario(models.Model):
     motivo = models.CharField(max_length=255)
 
     class Meta:
-        managed = False
+        managed = True
         db_table = 'reversionmovimientoinventario'
 

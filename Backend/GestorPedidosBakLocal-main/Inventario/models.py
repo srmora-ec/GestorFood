@@ -19,7 +19,7 @@ class MovimientoInventario(models.Model):
 
 
     class Meta:
-        managed = False
+        managed = True
         db_table = 'movimientoinventario'
 
 
@@ -32,7 +32,7 @@ class DetalleMovimientoInventario(models.Model):
     tipo = models.CharField(max_length=1, choices=[('E', 'Entrada'), ('S', 'Salida')])
     
     class Meta:
-        managed = False
+        managed = True
         db_table = 'detallemovimientoinventario'
 
 class Inventario(models.Model):
@@ -45,6 +45,6 @@ class Inventario(models.Model):
     stock_minimo = models.DecimalField(max_digits=9, decimal_places=2, blank=True, null=True)
     cantidad_disponible = models.DecimalField(max_digits=9, decimal_places=2)
     class Meta:
-        managed = False
+        managed = True
         db_table = 'inventario'
 

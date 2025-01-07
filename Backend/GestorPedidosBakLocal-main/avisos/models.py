@@ -10,5 +10,5 @@ class AvisosPrincipales(models.Model):
     sestado = models.CharField(max_length=1)
 
     class Meta:
-        managed = True
+        managed = False
         db_table = 'avisosprincipales'

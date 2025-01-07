@@ -52,7 +52,6 @@ const Carrusel = () => {
   // Función para obtener los avisos principales de la API
   const fetchAvisosPrincipales = async () => {
     try {
-      const response = await fetch(API_URL + '/avisos/avisos/');
       const data = await response.json();
       setAvisos(data.avisos_principales);
     } catch (error) {

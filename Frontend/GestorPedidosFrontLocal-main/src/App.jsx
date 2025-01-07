@@ -36,7 +36,7 @@ import Sucursales from "./Clientes/sucursal";
 import InicioCliente from "./Clientes/inicio";
 import CatMenuClientes from "./Clientes/catMenuClientes";
 import MenuCliente from "./Clientes/menuClientes";
-
+import MenuMotorizado from "./components/Motorizado/menumotorizado";
 function App() {
   const {
     token: { colorBgContainer, borderRadiusLG },
@@ -71,6 +71,7 @@ function App() {
               <Route path="/Menu/:categoryId" element={<MenuCliente/>} />  
               <Route path="/home" element={<AdminMenu />} />
               <Route path="/homemesero" element={<MenuMesero />} />
+              <Route path="/homemotorizado" element={<MenuMotorizado />} />
               <Route path="/cocina" element={<MenuCocina/>} />
               <Route path="/S" element={<LocationCard/>} />
               {/* Rutas para autenticación */}

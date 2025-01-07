@@ -19,45 +19,65 @@ from django.views.decorators.csrf import csrf_protect
 from utils import autenticarUsuario
 import jwt
 import traceback
-
+from Empleados.models import Motorizado
 @method_decorator(csrf_exempt, name='dispatch')
 class listar_empleados(View):
     @transaction.atomic
     def get(self, request, *args, **kwargs):
         try:
-            # token = request.headers.get('Authorization', '').split('Bearer ')[-1]
-            # print('xD')
-            # if not token:
-            #     print('xD2')
-            #     return JsonResponse({'error': 'Token no proporcionado'}, status=400)
-            # try:
-            #     # Decodificar el token
-            #     print('xD')
-            #     user=autenticarUsuario(token)
-            # except jwt.ExpiredSignatureError:
-            #     print('xD')
-            #     print("Error occurred:", "No tienes permiso para ver los empleados")
-            #     return JsonResponse({'error': 'Token ha expirado'}, status=400)
-            # except jwt.InvalidTokenError:
-            #     print("Error occurred:", "No tienes permiso para ver los empleados")
-            #     return JsonResponse({'error': 'Token inválido'}, status=400)
-            # if(user.rol!='A'):
-            #     print("Error occurred:", "No tienes permiso para ver los empleados")
-            #     return JsonResponse({'error': 'No tienes permiso para ver los empleados'}, status=400)
-            print('xD')
             idsucursal = kwargs.get('idsucursal') 
             administradores = Administrador.objects.all()
-            print('xD')
+
             if idsucursal:
-                jefes_cocina = JefeCocina.objects.filter(id_sucursal=idsucursal) if idsucursal else JefeCocina.objects.all()           
-                meseros = Meseros.objects.filter(id_sucursal=idsucursal) if idsucursal else Meseros.objects.all()
+                jefes_cocina = JefeCocina.objects.filter(id_sucursal=idsucursal)
+                meseros = Meseros.objects.filter(id_sucursal=idsucursal)
+                motorizados = Motorizado.objects.filter(id_sucursal=idsucursal)
             else:
                 jefes_cocina = JefeCocina.objects.all()
                 meseros = Meseros.objects.all()
+                motorizados = Motorizado.objects.all()
+
             empleados = {
-                'JefesCocina': [{'id': j.id_jefecocina, 'tipo': 'X', 'sucursal': j.id_sucursal.id_sucursal if j.id_sucursal else None, 'nombre': j.nombre, 'apellido': j.apellido, 'telefono': j.telefono} for j in jefes_cocina],
-                'Administradores': [{'id': a.id_administrador, 'tipo': 'A', 'sucursal': None, 'nombre': a.nombre, 'apellido': a.apellido, 'telefono': a.telefono} for a in administradores],
-                'Meseros': [{'id': m.id_mesero, 'tipo': 'M', 'sucursal': m.id_sucursal.id_sucursal if m.id_sucursal else None, 'nombre': m.nombre, 'apellido': m.apellido, 'telefono': m.telefono} for m in meseros],
+                'JefesCocina': [
+                    {
+                        'id': j.id_jefecocina,
+                        'tipo': 'X',
+                        'sucursal': j.id_sucursal.id_sucursal if j.id_sucursal else None,
+                        'nombre': j.nombre,
+                        'apellido': j.apellido,
+                        'telefono': j.telefono
+                    } for j in jefes_cocina
+                ],
+                'Administradores': [
+                    {
+                        'id': a.id_administrador,
+                        'tipo': 'A',
+                        'sucursal': None,
+                        'nombre': a.nombre,
+                        'apellido': a.apellido,
+                        'telefono': a.telefono
+                    } for a in administradores
+                ],
+                'Meseros': [
+                    {
+                        'id': m.id_mesero,
+                        'tipo': 'M',
+                        'sucursal': m.id_sucursal.id_sucursal if m.id_sucursal else None,
+                        'nombre': m.nombre,
+                        'apellido': m.apellido,
+                        'telefono': m.telefono
+                    } for m in meseros
+                ],
+                'Motorizados': [
+                    {
+                        'id': d.id_motorizado,
+                        'tipo': 'D',
+                        'sucursal': d.id_sucursal.id_sucursal if d.id_sucursal else None,
+                        'nombre': d.nombre,
+                        'apellido': d.apellido,
+                        'telefono': d.telefono
+                    } for d in motorizados
+                ],
             }
 
             return JsonResponse({'empleados': empleados})
@@ -66,6 +86,7 @@ class listar_empleados(View):
             print("Error occurred:", traceback.format_exc())
             # Devolver el error en la respuesta JSON
             return JsonResponse({'error': str(e)}, status=400)
+
 @method_decorator(csrf_exempt, name='dispatch')
 class CrearUsuarioView(View):
     @transaction.atomic
@@ -83,6 +104,7 @@ class CrearUsuarioView(View):
                 return JsonResponse({'error': 'Token inválido'}, status=400)
             if user.rol != 'A':
                 return JsonResponse({'error': 'No tienes permiso para crear un usuario'}, status=400)
+            
             # Cargar y validar los datos enviados en la solicitud
             data = json.loads(request.body)
             required_fields = ['nombreusuario', 'contrasenia', 'tipo_empleado', 'id_sucursal', 'nombre', 'apellido', 'telefono']
@@ -92,7 +114,7 @@ class CrearUsuarioView(View):
 
             # Validar tipo de empleado
             tipo_empleado = data.get('tipo_empleado')
-            if tipo_empleado not in ['X', 'M']:
+            if tipo_empleado not in ['X', 'M', 'D']:
                 return JsonResponse({'error': 'Tipo de empleado no válido'}, status=400)
 
             # Crear la cuenta y usuario asociado
@@ -132,6 +154,8 @@ class CrearUsuarioView(View):
                 JefeCocina.objects.create(**empleado_data)
             elif tipo_empleado == 'M':  # Mesero
                 Meseros.objects.create(**empleado_data)
+            elif tipo_empleado == 'D':  # Motorizado
+                Motorizado.objects.create(**empleado_data)
 
             return JsonResponse({'mensaje': 'Usuario y empleado creado con éxito'})
 

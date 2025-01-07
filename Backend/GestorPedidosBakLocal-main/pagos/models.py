@@ -11,7 +11,7 @@ class Tipopago(models.Model):
     cantidad = models.DecimalField(max_digits=8, decimal_places=2, null=False)
 
     class Meta:
-        managed = False
+        managed = True
         db_table = 'tipopago'
 
 class Periodo(models.Model):
@@ -21,7 +21,7 @@ class Periodo(models.Model):
     hasta = models.DateTimeField(null=False)
 
     class Meta:
-        managed = False
+        managed = True
         db_table = 'periodo'
 
 class Pagos(models.Model):
@@ -33,7 +33,7 @@ class Pagos(models.Model):
     horadepago = models.DateTimeField(null=False)
 
     class Meta:
-        managed = False
+        managed = True
         db_table = 'pagos'
 class PagosTransferencia(models.Model):
     id_pagotransferencia = models.AutoField(primary_key=True)
@@ -46,7 +46,7 @@ class PagosTransferencia(models.Model):
     hora_confirmacion_pago = models.DateTimeField(null=True)
 
     class Meta:
-        managed = False
+        managed = True
         db_table = 'pagostransferencia'
 class PagosEfectivo(models.Model):
     id_pagoefectivo = models.AutoField(primary_key=True)
@@ -59,7 +59,7 @@ class PagosEfectivo(models.Model):
     id_pedido = models.ForeignKey(Pedidos, on_delete=models.CASCADE, db_column='id_pedido')
 
     class Meta:
-        managed = False
+        managed = True
         db_table = 'pagosefectivo'
 class PagosPasarela(models.Model):
     id_pagopasarela = models.AutoField(primary_key=True)
@@ -70,5 +70,5 @@ class PagosPasarela(models.Model):
     codigo_unico = models.IntegerField(null=True)  # Cambiado a BinaryField para almacenar BYTEA
 
     class Meta:
-        managed = False
+        managed = True
         db_table = 'pagospasarela'

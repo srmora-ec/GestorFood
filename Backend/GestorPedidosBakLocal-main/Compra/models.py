@@ -12,7 +12,7 @@ class Compras(models.Model):
     id_procesamiento = models.ForeignKey(Procesamiento, models.DO_NOTHING, db_column='id_procesamiento')
       
     class Meta:
-        managed = False
+        managed = True
         db_table = 'compras'
 
 class DetalleCompra(models.Model):
@@ -25,5 +25,5 @@ class DetalleCompra(models.Model):
     id_um = models.ForeignKey(UnidadMedida, models.DO_NOTHING, db_column='id_um')
 
     class Meta:
-        managed = False
+        managed = True
         db_table = 'detallecompra'

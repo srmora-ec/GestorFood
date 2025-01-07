@@ -13,7 +13,7 @@ class Codigosri(models.Model):
     rango_hasta = models.CharField(max_length=9)  # Este será el último número de factura en el rango
 
     class Meta:
-        managed = False
+        managed = True
         db_table = 'codigosri'
         unique_together = (('rango_desde', 'rango_hasta'),)
 
@@ -51,7 +51,7 @@ class Codigoautorizacion(models.Model):
     nombre = models.CharField(max_length=255, blank=True, null=True)
 
     class Meta:
-        managed = False
+        managed = True
         db_table = 'codigoautorizacion'
 
     @classmethod
@@ -86,6 +86,6 @@ class Puntofacturacion(models.Model):
     ruc = models.CharField(max_length=13, blank=True, null=True)
 
     class Meta:
-        managed = False
+        managed = True
         db_table = 'puntofacturacion'
         

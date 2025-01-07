@@ -16,7 +16,7 @@ from django.contrib.auth.models import AbstractUser
 #     correorecuperacion = models.CharField(max_length=256, null=True, blank=True)
 
 #     class Meta:
-#         managed = False
+#         managed = True
 #         db_table = 'cuenta'
 
 
@@ -61,7 +61,7 @@ class Clientes(models.Model):
     sestado = models.CharField(max_length=1)
 
     class Meta:
-        managed = False
+        managed = True
         db_table = 'clientes'
 
 class Ubicaciones(models.Model):

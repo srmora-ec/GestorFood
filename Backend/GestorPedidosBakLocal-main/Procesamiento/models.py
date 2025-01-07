@@ -11,5 +11,5 @@ class Procesamiento(models.Model):
     id_bodega = models.ForeignKey(Bodegas, models.DO_NOTHING, db_column='id_bodega')
 
     class Meta:
-        managed = False
+        managed = True
         db_table = 'procesamiento'

@@ -10,5 +10,5 @@ class Bodegas(models.Model):
     sestado = models.CharField(max_length=1)
 
     class Meta:
-        managed = False
+        managed = True
         db_table = 'bodegas'

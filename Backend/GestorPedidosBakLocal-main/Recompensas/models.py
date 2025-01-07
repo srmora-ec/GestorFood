@@ -9,7 +9,7 @@ class RecompensasProductos(models.Model):
     sestado = models.CharField(max_length=1, choices=[('0', '0'), ('1', '1')])
 
     class Meta:
-        managed = False
+        managed = True
         db_table = 'recompensasproductos'
 
 class RecompensasCombos(models.Model):
@@ -19,5 +19,5 @@ class RecompensasCombos(models.Model):
     sestado = models.CharField(max_length=1, choices=[('0', '0'), ('1', '1')])
 
     class Meta:
-        managed = False
+        managed = True
         db_table = 'recompensascombos'
