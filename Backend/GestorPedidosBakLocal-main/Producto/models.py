@@ -21,60 +21,70 @@ class Categorias(models.Model):
     class Meta: 
         managed = True
         db_table = 'categorias'
+class Impuestos(models.Model):
+    id_impuesto = models.AutoField(primary_key=True)
+    nombre = models.CharField(max_length=100, unique=True)
+    porcentaje = models.DecimalField(max_digits=5, decimal_places=2)  # Por ejemplo, 15.00 para un 15%
+    
+    class Meta:
+        managed = True
+        db_table = 'impuestos'
+        verbose_name = 'Impuesto'
+        verbose_name_plural = 'Impuestos'
+    
+    def __str__(self):
+        return f"{self.nombre} ({self.porcentaje}%)"
+
 class Producto(models.Model):
     id_producto = models.AutoField(primary_key=True)
     id_categoria = models.ForeignKey('Categorias', on_delete=models.CASCADE, db_column='id_categoria')
-    id_um = models.ForeignKey('UnidadMedida', on_delete=models.CASCADE,db_column='id_um')
+    id_um = models.ForeignKey('UnidadMedida', on_delete=models.CASCADE, db_column='id_um')
     imagenp = models.BinaryField(null=True)
-    puntosp = models.DecimalField(max_digits=3, decimal_places=0,default=0)
+    puntosp = models.DecimalField(max_digits=3, decimal_places=0, default=0)
     codprincipal = models.CharField(max_length=25, null=True)
     nombreproducto = models.CharField(max_length=300)
     descripcionproducto = models.CharField(max_length=300, null=True, blank=True)
     preciounitario = models.DecimalField(max_digits=14, decimal_places=2)
-    iva = models.CharField(max_length=1, choices=[('0', '0'), ('1', '1')], null=False)
-    ice = models.CharField(max_length=1, choices=[('0', '0'), ('1', '1')], null=False)
-    irbpnr = models.CharField(max_length=1, choices=[('0', '0'), ('1', '1')], null=False)
     sestado = models.CharField(max_length=1)
 
     class Meta:
         managed = True
         db_table = 'producto'
+        verbose_name = 'Producto'
+        verbose_name_plural = 'Productos'
+    
     def calcular_impuestos(self):
-        # Precio unitario con todos los impuestos aplicados
         precio_base = self.preciounitario
+        impuestos = {}
+        total_impuestos = Decimal(0)
 
-        # Factor total de impuestos
-        impuesto_factor = Decimal(1.0)  # Usar Decimal aquí en lugar de float
-        if self.iva == '1':
-            impuesto_factor *= Decimal(1.15)  # IVA 15%
-        if self.ice == '1':
-            impuesto_factor *= Decimal(1.50)  # ICE 50%
-        if self.irbpnr == '1':
-            impuesto_factor *= Decimal(1.10)  # IRBPNR 10%
-
-        # Calcular el precio base dividiendo el precio unitario entre el factor total de impuestos
-        precio_base_sin_impuestos = precio_base / impuesto_factor
-
-        # Calcular los impuestos individuales
-        impuestos = {
-            'iva': Decimal(0),
-            'ice': Decimal(0),
-            'irbpnr': Decimal(0)
+        # Recuperar los impuestos asociados al producto
+        for relacion in self.productoimpuestos_set.all():
+            impuesto = relacion.impuesto
+            impuesto_calculado = precio_base * (impuesto.porcentaje / Decimal(100))
+            impuestos[impuesto.nombre] = round(impuesto_calculado, 2)
+            total_impuestos += impuesto_calculado
+        
+        # Calcular precio final
+        precio_final = precio_base + total_impuestos
+        return {
+            'impuestos_detalle': impuestos,
+            'precio_final': round(precio_final, 2)
         }
 
-        if self.iva == '1':
-            iva_calculado = precio_base - (precio_base_sin_impuestos * Decimal(1.15))
-            impuestos['iva'] = round(iva_calculado, 2)
-
-        if self.ice == '1':
-            ice_calculado = precio_base - (precio_base_sin_impuestos * Decimal(1.50))
-            impuestos['ice'] = round(ice_calculado, 2)
-
-        if self.irbpnr == '1':
-            irbpnr_calculado = precio_base - (precio_base_sin_impuestos * Decimal(1.10))
-            impuestos['irbpnr'] = round(irbpnr_calculado, 2)
-
-        return impuestos
+class ProductoImpuestos(models.Model):
+    id_producto = models.ForeignKey(Producto, on_delete=models.CASCADE, db_column='id_producto')
+    id_impuesto = models.ForeignKey(Impuestos, on_delete=models.CASCADE, db_column='id_impuesto')
+    
+    class Meta:
+        managed = True
+        db_table = 'producto_impuestos'
+        unique_together = ('id_producto', 'id_impuesto')
+        verbose_name = 'Relación Producto-Impuesto'
+        verbose_name_plural = 'Relaciones Producto-Impuestos'
+    
+    def __str__(self):
+        return f"{self.id_producto.nombreproducto} -> {self.id_impuesto.nombre}"
 
 class UnidadMedida(models.Model):
     idum = models.AutoField(primary_key=True)

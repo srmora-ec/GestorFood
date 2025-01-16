@@ -38,9 +38,21 @@ const EditarProducto = () => {
     const [selectedSucursal, setSucursal] = useState([null]);
     const [selectedProducto, setProducto] = useState([null]);
     const [horarioDetails, setHorarioDetails] = useState([]);
+    const [impuestos, setImpuestos] = useState([]);
+
     useEffect(() => {
         fetchSucursal();
+        fetchImpuestos();
     }, []);
+    const fetchImpuestos = async () => {
+        try {
+          const response = await fetch(API_URL + '/producto/ListarImpuestos/');
+          const data = await response.json();
+          setImpuestos(data.impuestos);
+        } catch (error) {
+          console.error('Error fetching impuestos data:', error);
+        }
+      };
 
     const handleProductoChange = (value) => {
 
@@ -260,6 +272,8 @@ const EditarProducto = () => {
         const productoToEdit = productos.find((producto) => producto.id_producto === productId.id_producto);
         setEditingProductId(productId.id_producto);
         setInitialFormValues(productoToEdit);
+        console.log("aver:");
+        console.log(initialFormValues);
         setEditModalVisible(true);
         fetchproducto(currentPage);
     };
@@ -268,6 +282,8 @@ const EditarProducto = () => {
 
         setEditingProductId(null);
         setInitialFormValues(null);
+        console.log("aver2:");
+        console.log(initialFormValues);
         setEditModalVisible(false);
         fetchproducto(currentPage);
     };
@@ -301,12 +317,7 @@ const EditarProducto = () => {
     const handleSaveEdit = async (productId, formValues) => {
         try {
             const formData = new FormData();
-            Object.entries(formValues).forEach(([key, value]) => {
-                if (key === 'iva' || key === 'ice' || key === 'irbpnr') {
-                    value = value ? '1' : '0';
-                }
-                formData.append(key, value);
-            });
+            formData.append('impuestos', JSON.stringify(formValues.impuestos));
 
             const imagenpInput = formValues['imagenp'];
             if (imagenpInput && imagenpInput[0] && imagenpInput[0].originFileObj) {
@@ -367,15 +378,26 @@ const EditarProducto = () => {
     };
 
     const showModalContent = (producto) => {
+        // Establece dinámicamente los valores del formulario cuando se abre el modal
+        form.setFieldsValue({
+            nombreproducto: producto.nombreproducto,
+            descripcionproducto: producto.descripcionproducto,
+            id_um: producto.id_um,
+            id_categoria: producto.id_categoria,
+            impuestos: producto.impuestos ? producto.impuestos.map((imp) => imp.id_impuesto) : [],
+            puntosp: producto.puntosp,
+            imagenp: [],
+        });
+    
         return (
             <Form form={form} onFinish={(values) => handleSaveEdit(producto.id_producto, values)}>
-                <Form.Item label="Nombre del Producto" name="nombreproducto" initialValue={producto.nombreproducto}>
+                <Form.Item label="Nombre del Producto" name="nombreproducto">
                     <Input />
                 </Form.Item>
-                <Form.Item label="Descripción del Producto" name="descripcionproducto" initialValue={producto.descripcionproducto}>
+                <Form.Item label="Descripción del Producto" name="descripcionproducto">
                     <Input />
                 </Form.Item>
-                <Form.Item label="Unidad de Medida" name="id_um" initialValue={producto.id_um}>
+                <Form.Item label="Unidad de Medida" name="id_um">
                     <Select>
                         {umList.map((um) => (
                             <Option key={um.id_um} value={um.id_um}>
@@ -384,7 +406,7 @@ const EditarProducto = () => {
                         ))}
                     </Select>
                 </Form.Item>
-                <Form.Item label="Categoría" name="id_categoria" initialValue={producto.id_categoria}>
+                <Form.Item label="Categoría" name="id_categoria">
                     <Select>
                         {categoriaList.map((categoria) => (
                             <Option key={categoria.id_categoria} value={categoria.id_categoria}>
@@ -393,20 +415,18 @@ const EditarProducto = () => {
                         ))}
                     </Select>
                 </Form.Item>
-                <Form.Item label="IVA" name="iva" valuePropName="checked" initialValue={producto.iva === '1'}>
-                    <Checkbox />
+                <Form.Item name="impuestos" label="Impuestos">
+                    <Checkbox.Group>
+                        {impuestos.map((impuesto) => (
+                            <Checkbox key={impuesto.id_impuesto} value={impuesto.id_impuesto}>
+                                {impuesto.nombre} ({impuesto.porcentaje}%)
+                            </Checkbox>
+                        ))}
+                    </Checkbox.Group>
                 </Form.Item>
-                <Form.Item label="ICE" name="ice" valuePropName="checked" initialValue={producto.ice === '1'}>
-                    <Checkbox />
-                </Form.Item>
-                <Form.Item label="IRBPNR" name="irbpnr" valuePropName="checked" initialValue={producto.irbpnr === '1'}>
-                    <Checkbox />
-                </Form.Item>
-
-                <Form.Item label="Puntos" name="puntosp" initialValue={producto.puntosp}>
+                <Form.Item label="Puntos" name="puntosp">
                     <Input type="number" />
                 </Form.Item>
-
                 <Form.Item
                     label="Imagen del Producto"
                     name="imagenp"

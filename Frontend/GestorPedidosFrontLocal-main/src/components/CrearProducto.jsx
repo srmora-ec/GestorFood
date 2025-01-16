@@ -1,171 +1,128 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { notification, Form, Input, Button, Upload, message, Select, Checkbox, InputNumber, Tour } from 'antd';
 import { UploadOutlined, QuestionCircleOutlined } from '@ant-design/icons';
+import { Row, Col } from 'react-bootstrap';
 import TransferContainer from './selectcomponent.jsx';
-import { Row, Col } from 'react-bootstrap';  // Importar el nuevo componente
-import categoriasejem from './res/categoriasejem.png'
+import categoriasejem from './res/categoriasejem.png';
 import API_URL from '../config.js';
+
 const CrearProducto = () => {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [categorias, setCategorias] = useState([]);
   const [unidadesMedida, setUnidadesMedida] = useState([]);
+  const [impuestos, setImpuestos] = useState([]);
   const [fileList, setFileList] = useState([]);
-  const [imagenP, setimagenP] = useState(null);
-  const [detallecomponente, setdetallecomponente] = useState(false);
+  const [imagenP, setImagenP] = useState(null);
+  const [detallecomponente, setDetallecomponente] = useState(false);
   const [mostrarFabricacion, setMostrarFabricacion] = useState(false);
-  const ref1 = useRef(null);
-  const ref2 = useRef(null);
-  const ref3 = useRef(null);
-  const ref4 = useRef(null);
-  const ref5 = useRef(null);
-  const ref6 = useRef(null);
-  const ref7 = useRef(null);
-  const ref8 = useRef(null);
-  const ref9 = useRef(null);
-  const ref10 = useRef(null);
-
   const [open, setOpen] = useState(false);
+
+  const refs = Array(10).fill(null).map(() => useRef(null));
+
   const steps = [
     {
       title: 'Categoría',
-      description: 'La categoría es la clasificación principal del producto. \nPor ejemplo, si estás vendiendo comida rapida, las categorías podrían ser "Hamburguesas", "Papas", "Bebidas", etc.',
-      cover: (
-        <img
-          alt="categorias.png"
-          src={categoriasejem}
-        />
-      ),
-      target: () => ref1.current,
+      description: 'La categoría es la clasificación principal del producto. Por ejemplo, si estás vendiendo comida rápida, las categorías podrían ser "Hamburguesas", "Papas", "Bebidas", etc.',
+      cover: <img alt="categorias.png" src={categoriasejem || "/placeholder.svg"} />,
+      target: () => refs[0].current,
     },
     {
-      title: 'Unidad de medida',
-      description: 'La unidad de medida indica cómo se cuantifica o mide el producto. Por ejemplo, "Unidades", "Kilogramos", "Litros", etc. Especifica la unidad en la que se vende o se mide el producto.',
-      target: () => ref2.current,
+      title: 'Unidad de Medida',
+      description: 'Selecciona la unidad de medida para tu producto (ej: unidades, kilos, litros).',
+      target: () => refs[1].current,
     },
     {
-      title: 'Nombre del producto',
-      description: 'El nombre del producto es el identificador principal del artículo. Es el nombre que se mostrará a los clientes y los ayudará a identificar y distinguir el producto.',
-      target: () => ref3.current,
+      title: 'Nombre del Producto',
+      description: 'Ingresa un nombre claro y conciso para tu producto.',
+      target: () => refs[2].current,
     },
     {
-      title: 'Descripción del producto',
-      description: 'La descripción proporciona detalles adicionales sobre el producto. Puede incluir información sobre características, materiales, tamaños o cualquier otra información relevante que ayude a los clientes a comprender mejor el producto.',
-      target: () => ref4.current,
+      title: 'Descripción del Producto',
+      description: 'Proporciona una descripción detallada de tu producto, incluyendo sus características y beneficios.',
+      target: () => refs[3].current,
     },
     {
       title: 'Precio Unitario',
-      description: 'El precio unitario es el costo individual de una unidad del producto. Indica cuánto cuesta una sola pieza, unidad o cantidad específica del producto.',
-      target: () => ref5.current,
+      description: 'Ingresa el precio unitario de tu producto.',
+      target: () => refs[4].current,
     },
     {
-      title: 'Puntos del producto',
-      description: 'Si quieres manejar el sistema de recompensas puedes añadir puntos a los productos. Estos puntos podrán ser canjeados por los clientes para obtener una recompensa.',
-      target: () => ref6.current,
-    },
-    {
-      title: 'IVA (Impuesto al Valor Agregado)',
-      description: 'El IVA es un impuesto sobre el valor agregado al precio de venta del producto. Es un porcentaje adicional que se agrega al costo y se paga al gobierno. Puede variar según la ubicación y las regulaciones fiscales.',
-      target: () => ref7.current,
-    },
-    {
-      title: 'ICE (Impuesto a los Consumos Especiales)',
-      description: 'El ICE es un impuesto aplicado a ciertos productos considerados de lujo o especiales. No todos los productos están sujetos a este impuesto, y su tasa puede variar según la legislación fiscal.',
-      target: () => ref8.current,
-    },
-    {
-      title: 'IRBPNR (Impuesto a la Renta por Bienes Inmuebles y Plusvalía No Realizada)',
-      description: 'El IRBPNR es un impuesto que puede aplicarse a ganancias derivadas de bienes inmuebles y plusvalía no realizada. Este impuesto puede tener reglas específicas según la jurisdicción.',
-      target: () => ref9.current,
+      title: 'Impuestos',
+      description: 'Selecciona los impuestos aplicables a tu producto.',
+      target: () => refs[5].current,
     },
     {
       title: 'Imagen',
-      description: 'La imagen es una representación visual del producto. Puede ser una foto, gráfico o cualquier representación visual que ayude a los clientes a visualizar el producto antes de comprarlo. Ayuda a mejorar la presentación y la comercialización del producto.',
-      target: () => ref10.current,
+      description: 'Sube una imagen de tu producto.',
+      target: () => refs[9].current,
+    },
+    {
+      title: 'Añadir Fabricación',
+      description: 'Si tu producto se fabrica a partir de otros artículos, puedes añadir la información de fabricación aquí.',
+      target: () => refs[6].current,
+    },
+    {
+      title: 'Cantidad Generada',
+      description: 'Indica la cantidad del producto que se genera a partir del ensamble.',
+      target: () => refs[7].current,
+    },
+    {
+      title: 'Artículos de Ensamble',
+      description: 'Selecciona los artículos que se utilizan para ensamblar tu producto.',
+      target: () => refs[8].current,
     },
   ];
 
-
   useEffect(() => {
-    const fetchCategorias = async () => {
+    const fetchData = async () => {
       try {
-        const response = await fetch(API_URL +'/producto/listar_categorias/');
-        if (response.ok) {
-          const data = await response.json();
-          setCategorias(data.categorias);
-        } else {
-          const errorData = await response.json();
-          message.error(errorData.error);
-        }
+        const [categoriasRes, unidadesMedidaRes, impuestosRes] = await Promise.all([
+          fetch(API_URL + '/producto/listar_categorias/'),
+          fetch(API_URL + '/producto/listarum/'),
+          fetch(API_URL + '/producto/ListarImpuestos/')
+        ]);
+
+        const categoriasData = await categoriasRes.json();
+        const unidadesMedidaData = await unidadesMedidaRes.json();
+        const impuestosData = await impuestosRes.json();
+
+        setCategorias(categoriasData.categorias);
+        setUnidadesMedida(unidadesMedidaData.unidades_medida);
+        setImpuestos(impuestosData.impuestos);
       } catch (error) {
-        console.error('Error al cargar las categorías:', error);
-        message.error('Hubo un error al cargar las categorías');
+        console.error('Error al cargar los datos:', error);
+        message.error('Hubo un error al cargar los datos necesarios');
       }
     };
 
-
-
-    const fetchUnidadesMedida = async () => {
-      try {
-        const response = await fetch(API_URL +'/producto/listarum/');
-        if (response.ok) {
-          const data = await response.json();
-          setUnidadesMedida(data.unidades_medida);
-        } else {
-          const errorData = await response.json();
-          message.error(errorData.error);
-        }
-      } catch (error) {
-        console.error('Error al cargar las unidades de medida:', error);
-        message.error('Hubo un error al cargar las unidades de medida');
-      }
-    };
-    fetchCategorias();
-    fetchUnidadesMedida();
+    fetchData();
   }, []);
 
   const savedetalle = async (jsondetalle) => {
-    setdetallecomponente(jsondetalle);
-  }
-
-  useEffect(() => {
-    const imagenValue = form.getFieldValue('imagen_p');
-    console.log(imagenValue);
-    if (imagenValue) {
-      setFileList([
-        {
-          uid: '-1',
-          name: 'Imagen existente',
-          status: 'done',
-          url: imagenValue,
-        },
-      ]);
-    }
-  }, [form.getFieldValue('imagen_p')]);
+    setDetallecomponente(jsondetalle);
+  };
 
   const onFinish = async (values) => {
     try {
       setLoading(true);
       const formData = new FormData();
-      formData.append('id_categoria', values.id_categoria);
-      formData.append('id_um', values.id_um);
-      formData.append('nombre_producto', values.nombre_producto);
-      formData.append('descripcion_producto', values.descripcion_producto);
-      formData.append('precio_unitario', values.precio_unitario);
-      formData.append('puntos_p', values.puntos_p);
-      formData.append('iva', values.iva ? '1' : '0');
-      formData.append('ice', values.ice ? '1' : '0');
-      formData.append('irbpnr', values.irbpnr ? '1' : '0');
-      console.log("Hay imagn?" + imagenP);
-      formData.append('imagen_p', imagenP);
+      Object.keys(values).forEach(key => {
+        if (key !== 'imagen_p' && key !== 'impuestos') {
+          formData.append(key, values[key]);
+        }
+      });
       formData.append('detalle_comp', detallecomponente);
-      formData.append('cantidad', values.cantidad);
+      if (imagenP) {
+        formData.append('imagen_p', imagenP);
+      }
+      formData.append('impuestos', JSON.stringify(values.impuestos));
 
-      const response = await fetch(API_URL +'/producto/crearproducto/', {
+      const response = await fetch(API_URL + '/producto/crearproducto/', {
+        method: 'POST',
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`,
         },
-        method: 'POST',
         body: formData,
       });
 
@@ -176,6 +133,8 @@ const CrearProducto = () => {
           description: data.mensaje,
         });
         form.resetFields();
+        setFileList([]);
+        setImagenP(null);
       } else {
         const errorData = await response.json();
         notification.error({
@@ -194,19 +153,15 @@ const CrearProducto = () => {
     }
   };
 
-
-  const normFile = (e) => {
-    if (Array.isArray(e)) {
-      return e;
+  const handleImageChange = (info) => {
+    if (Array.isArray(info.fileList)) {
+      setFileList(info.fileList.slice(-1));
+      setImagenP(info.fileList.length > 0 ? info.fileList[0].originFileObj : null);
+    } else {
+      console.error('fileList is not an array:', info.fileList);
+      setFileList([]);
+      setImagenP(null);
     }
-    return e && e.fileList;
-  };
-  const handleChange = (info) => {
-    if (info.fileList.length > 1) {
-
-      info.fileList = [info.fileList.shift()];
-    }
-    setimagenP(info.fileList.length > 0 ? info.fileList[0].originFileObj : null);
   };
 
   return (
@@ -221,9 +176,9 @@ const CrearProducto = () => {
           right: '10px',
         }}
       />
-      <Form form={form} onFinish={onFinish} labelCol={{ span: 6 }} wrapperCol={{ span: 14 }}>
-        <span ref={ref1}>
-          <Form.Item name="id_categoria" label="Categoría" rules={[{ required: true }]}>
+      <Form form={form} onFinish={onFinish} layout="vertical">
+        <span ref={refs[0]}>
+          <Form.Item name="id_categoria" label="Categoría" rules={[{ required: true, message: 'Por favor seleccione una categoría' }]}>
             <Select placeholder="Seleccione una categoría">
               {categorias.map((categoria) => (
                 <Select.Option key={categoria.id_categoria} value={categoria.id_categoria}>
@@ -233,48 +188,51 @@ const CrearProducto = () => {
             </Select>
           </Form.Item>
         </span>
-        <span ref={ref2}>
-        <Form.Item name="id_um" label="Unidad de Medida" rules={[{ required: true }]}>
-          <Select placeholder="Seleccione una unidad de medida">
-            {unidadesMedida.map((um) => (
-              <Select.Option key={um.id_um} value={um.id_um}>
-                {um.nombre_um}
-              </Select.Option>
-            ))}
-          </Select>
-        </Form.Item>
+        <span ref={refs[1]}>
+          <Form.Item name="id_um" label="Unidad de Medida" rules={[{ required: true, message: 'Por favor seleccione una unidad de medida' }]}>
+            <Select placeholder="Seleccione una unidad de medida">
+              {unidadesMedida.map((um) => (
+                <Select.Option key={um.id_um} value={um.id_um}>
+                  {um.nombre_um}
+                </Select.Option>
+              ))}
+            </Select>
+          </Form.Item>
         </span>
-        <span ref={ref3}>
-        <Form.Item name="nombre_producto"label="Nombre del Producto" rules={[
-          { required: true, message: 'Por favor ingrese el nombre del producto' },
-          { max: 300, message: 'El nombre del producto no puede tener más de 300 caracteres' },
-        ]}>
-          <Input />
-        </Form.Item>
+        <span ref={refs[2]}>
+          <Form.Item name="nombre_producto" label="Nombre del Producto" rules={[{ required: true, message: 'Por favor ingrese el nombre del producto' }]}>
+            <Input />
+          </Form.Item>
         </span>
-        <span ref={ref4}>
-        <Form.Item name="descripcion_producto" label="Descripción del Producto" rules={[
-          { max: 300, message: 'La descripción del producto no puede tener más de 300 caracteres' },
-        ]}>
-          <Input.TextArea />
-        </Form.Item>
+        <span ref={refs[3]}>
+          <Form.Item name="descripcion_producto" label="Descripción del Producto">
+            <Input.TextArea />
+          </Form.Item>
         </span>
-        <span ref={ref5}>
-        <Form.Item
-          name="precio_unitario"
-          label="Precio Unitario"
-          rules={[
-            { required: true, message: 'Por favor ingrese el precio unitario' },
-            {
-              pattern: /^(?:\d+)?(?:\.\d{1,2})?$/,
-              message: 'El precio unitario debe ser un número válido con hasta 2 decimales',
-            },
-          ]}
-        >
-          <Input type="text" min={0} />
-        </Form.Item>
+        <span ref={refs[4]}>
+          <Form.Item name="precio_unitario" label="Precio Unitario" rules={[{ required: true, message: 'Por favor ingrese el precio unitario' }]}>
+            <InputNumber min={0} step={0.01} style={{ width: '100%' }} />
+          </Form.Item>
         </span>
-        <span ref={ref6}>
+        <span ref={refs[5]}>
+          <Form.Item name="impuestos" label="Impuestos">
+            <Checkbox.Group>
+              {impuestos.map((impuesto) => (
+                <Checkbox key={impuesto.id_impuesto} value={impuesto.id_impuesto}>
+                  {impuesto.nombre} ({impuesto.porcentaje}%)
+                </Checkbox>
+              ))}
+            </Checkbox.Group>
+          </Form.Item>
+        </span>
+        <span ref={refs[6]}>
+          <Form.Item>
+            <Button type="primary" onClick={() => setMostrarFabricacion(!mostrarFabricacion)}>
+              Añadir fabricación
+            </Button>
+          </Form.Item>
+        </span>
+        <span ref={refs[6]}>
         <Form.Item
           name="puntos_p"
           label="Puntos del Producto"
@@ -298,64 +256,48 @@ const CrearProducto = () => {
           <Input type="number" min={0} />
         </Form.Item>
         </span>
-        <span ref={ref7}>
-        <Form.Item name="iva" label="IVA" valuePropName="checked">
-          <Checkbox />
-        </Form.Item>
+        <span ref={refs[7]}>
+          <Row hidden={!mostrarFabricacion}>
+            <label>Cantidad generada a partir del ensamble</label>
+            <Col md={12}>
+              <Form.Item
+                label=":"
+                name="cantidad"
+                rules={[
+                  { type: 'number', message: 'Por favor, ingrese un valor numérico válido para la cantidad' },
+                ]}
+              >
+                <InputNumber
+                  step={0.01}
+                  formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, '.')}
+                  min={0}
+                />
+              </Form.Item>
+              <h6>Selecciona los artículos que ensamblan tu artículo</h6>
+              <div style={{ border: '1px solid #A4A4A4', padding: '2%', margin: '5%' }}>
+                <TransferContainer onValor={savedetalle} />
+              </div>
+            </Col>
+          </Row>
         </span>
-        <span ref={ref8}>
-        <Form.Item name="ice" label="ICE" ref={ref8} valuePropName="checked">
-          <Checkbox />
-        </Form.Item>
+        <span ref={refs[8]}>
         </span>
-        <span ref={ref9}>
-        <Form.Item name="irbpnr" label="IRBPNR" ref={ref9} valuePropName="checked">
-          <Checkbox />
-        </Form.Item>
-        </span>
-        <span ref={ref10}>
-        <Form.Item label="Imagen" name="imagen_p" ref={ref10} valuePropName="fileList" getValueFromEvent={normFile}>
-          <Upload
-            accept="image/*"
-            listType="picture"
-            beforeUpload={() => false}
-            fileList={imagenP ? [{ uid: '1', originFileObj: imagenP }] : []}
-            onChange={handleChange}
-          >
-            <Button icon={<UploadOutlined />}>Seleccionar Imagen</Button>
-          </Upload>
-        </Form.Item>
-        </span>
-        <Row hidden={!mostrarFabricacion}>
-          <label>Cantidad generada a partir del ensamble</label>
-          <Col md={12}>
-            <Form.Item
-              label=':'
-              name="cantidad"
-              rules={[
-                { required: false },
-                { type: 'number', message: 'Por favor, ingrese un valor numérico válido para la cantidad' },
-              ]}
+        <span ref={refs[9]}>
+          <Form.Item label="Imagen" name="imagen_p" valuePropName="fileList" getValueFromEvent={(e) => e && e.fileList}>
+            <Upload
+              accept="image/*"
+              listType="picture"
+              fileList={fileList}
+              beforeUpload={() => false}
+              onChange={handleImageChange}
+              maxCount={1}
             >
-              <InputNumber
-                step={0.01}
-                formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, '.')}
-                min={0}
-              />
-            </Form.Item>
-            <h6>Selecciona los artículos que ensamblan tu artículo</h6>
-            <div style={{ border: '1px solid #A4A4A4', padding: '2%', margin: '5%' }}>
-              <TransferContainer onValor={savedetalle} />
-            </div>
-          </Col>
-        </Row>
-        <Form.Item wrapperCol={{ offset: 6, span: 14 }}>
-          <Button type="primary" onClick={() => setMostrarFabricacion(!mostrarFabricacion)}>
-            Añadir fabricación
-          </Button>
-        </Form.Item>
+              <Button icon={<UploadOutlined />}>Seleccionar Imagen</Button>
+            </Upload>
+          </Form.Item>
+        </span>
 
-        <Form.Item wrapperCol={{ offset: 6, span: 14 }}>
+        <Form.Item>
           <Button type="primary" htmlType="submit" loading={loading}>
             Crear Producto
           </Button>
@@ -366,5 +308,5 @@ const CrearProducto = () => {
   );
 };
 
-
 export default CrearProducto;
+
