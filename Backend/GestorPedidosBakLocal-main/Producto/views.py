@@ -418,10 +418,8 @@ class EditarUnidadMedida(View):
 #---------------PRODUCTO----------------------
 #-------------crear-------------------------
 
-
 @method_decorator(csrf_exempt, name='dispatch')
 class CrearProducto(View):
-    #@method_decorator(login_required)
     @transaction.atomic
     def post(self, request, *args, **kwargs):
         try:
@@ -437,9 +435,7 @@ class CrearProducto(View):
                     return JsonResponse({'error': 'Token inválido'}, status=400)
                 if user.rol != 'A':
                     return JsonResponse({'error': 'No tienes permiso para crear un producto'}, status=400)
-                #cuenta = Cuenta.objects.get(nombreusuario=request.user.username)
-                #if cuenta.rol != 'S':
-                #    return JsonResponse({'error': 'No tienes permisos para crear un producto'}, status=403)
+
                 id_categoria = request.POST.get('id_categoria')
                 id_um = request.POST.get('id_um')
                 imagen_p = request.FILES.get('imagen_p')
@@ -447,10 +443,8 @@ class CrearProducto(View):
                 nombreproducto = request.POST.get('nombre_producto')
                 descripcionproducto = request.POST.get('descripcion_producto')
                 preciounitario = request.POST.get('precio_unitario')
-                iva = request.POST.get('iva')
-                ice = request.POST.get('ice')
-                irbpnr = request.POST.get('irbpnr')
-                image_64_encode=None
+                image_64_encode = None
+                
                 if imagen_p:
                     try:
                         image_read = imagen_p.read()
@@ -471,35 +465,46 @@ class CrearProducto(View):
                     nombreproducto=nombreproducto,
                     descripcionproducto=descripcionproducto,
                     preciounitario=preciounitario,
-                    iva=iva,
-                    ice=ice,
-                    irbpnr=irbpnr,
-                    sestado = 1
+                    sestado='1'  # Asegúrate de que el estado del producto sea correcto
                 )
-                detalle_comp = json.loads(request.POST.get('detalle_comp'))
+                
+                # Asociar los impuestos al producto
+                impuestos_seleccionados = json.loads(request.POST.get('impuestos', '[]'))
+                for impuesto_id in impuestos_seleccionados:
+                    try:
+                        impuesto = Impuestos.objects.get(id_impuesto=impuesto_id)
+                        ProductoImpuestos.objects.create(id_producto=producto, id_impuesto=impuesto)
+                    except Impuestos.DoesNotExist:
+                        return JsonResponse({'error': f'Impuesto con id {impuesto_id} no encontrado'}, status=400)
+
+                # Si hay un ensamblaje de componentes, guardarlo
+                detalle_comp = json.loads(request.POST.get('detalle_comp', '[]'))
                 if detalle_comp:
                     cantidadpadre = Decimal(request.POST.get('cantidad', 0))
-                    
                     ensambleproducto = EnsambleProducto.objects.create(
                         id_producto=producto,
                         padrecantidad=cantidadpadre,
-                        id_um=unidad_medida  # Ajusta esta línea según tu lógica
+                        id_um=unidad_medida
                     )
                     for detalle_data in detalle_comp:
                         componente_hijo = Componente.objects.get(id_componente=detalle_data['id'])
                         um = componente_hijo.id_um
-                        detalleEnsambleProducto = DetalleEnsambleProducto.objects.create(
+                        DetalleEnsambleProducto.objects.create(
                             id_emsamblep=ensambleproducto,
                             id_componentehijo=componente_hijo,
                             cantidadhijo=detalle_data['cantidad'],
                             id_umhijo=um
                         )
-                producto.save()        
+                
+                # Guardar el producto final
+                producto.save()
 
                 return JsonResponse({'mensaje': 'Producto creado con éxito'})
+
         except Exception as e:
             traceback.print_exc()
             return JsonResponse({'error': str(e)}, status=400)
+
 
 #---------- Listar para productos-------------------------
 @method_decorator(csrf_exempt, name='dispatch')
@@ -551,7 +556,6 @@ class ListaCategoriasConProductos(View):
             return JsonResponse({'error': str(e)}, status=400)#----------editar--------------------------
 
 
-
 @method_decorator(csrf_exempt, name='dispatch')
 #@method_decorator(login_required, name='dispatch')
 class EditarProducto(View):
@@ -569,8 +573,11 @@ class EditarProducto(View):
                 return JsonResponse({'error': 'Token inválido'}, status=400)
             if user.rol != 'A':
                 return JsonResponse({'error': 'No tienes permiso para editar un producto'}, status=400)
+            
             producto_id = kwargs.get('producto_id')
             producto = Producto.objects.get(id_producto=producto_id)
+
+            # Actualización de los datos del producto
             producto.id_categoria = Categorias.objects.get(id_categoria=request.POST.get('id_categoria', producto.id_categoria.id_categoria))
             producto.id_um = UnidadMedida.objects.get(idum=request.POST.get('id_um', producto.id_um.idum))
             producto.puntosp = request.POST.get('puntosp', producto.puntosp)
@@ -578,9 +585,19 @@ class EditarProducto(View):
             producto.nombreproducto = request.POST.get('nombreproducto', producto.nombreproducto)
             producto.descripcionproducto = request.POST.get('descripcionproducto', producto.descripcionproducto)
             producto.preciounitario = request.POST.get('preciounitario', producto.preciounitario)
-            producto.iva = request.POST.get('iva', producto.iva)
-            producto.ice = request.POST.get('ice', producto.ice)
-            producto.irbpnr = request.POST.get('irbpnr', producto.irbpnr)
+
+            # Manejo de los impuestos (Recibimos los impuestos seleccionados en un JSON)
+            impuestos_seleccionados = request.POST.get('impuestos', None)
+            if impuestos_seleccionados:
+                impuestos_seleccionados = json.loads(impuestos_seleccionados)
+                
+                # Limpiar las relaciones de impuestos actuales
+                producto.productoimpuestos_set.all().delete()
+
+                # Agregar los nuevos impuestos seleccionados
+                for impuesto_id in impuestos_seleccionados:
+                    impuesto = Impuestos.objects.get(id_impuesto=impuesto_id)
+                    ProductoImpuestos.objects.create(id_producto=producto, id_impuesto=impuesto)
 
             # Manejo de la imagen
             imagen_producto = request.FILES.get('imagenp')
@@ -592,6 +609,7 @@ class EditarProducto(View):
                     producto.imagenp = image_64_encode
                 except Exception as img_error:
                     return JsonResponse({'error': f"Error al procesar imagen: {str(img_error)}"}, status=400)
+
             producto.save()
             return JsonResponse({'mensaje': 'Producto editado con éxito'})
         except Exception as e:
@@ -1139,18 +1157,53 @@ class FabricarProducto(View):
         except Exception as e:
             traceback.print_exc()
             return JsonResponse({'error': str(e)}, status=500)
-
-
-class ListarProductos(View):
+class ListarImpuestos(View):
     def get(self, request, *args, **kwargs):
         try:
             # Parámetros de paginación y búsqueda
-            page = int(request.GET.get('page',1))
+            page = int(request.GET.get('page', 1))
+            size = int(request.GET.get('size', 10))
+            search = request.GET.get('search', '')
+
+            # Filtrar impuestos por término de búsqueda
+            impuestos = Impuestos.objects.filter(nombre__icontains=search)
+
+            # Configurar la paginación
+            paginator = Paginator(impuestos, size)
+
+            try:
+                # Obtener la página actual
+                impuestos_pagina = paginator.page(page)
+            except EmptyPage:
+                # Si la página está fuera de rango, devolver una lista vacía
+                impuestos_pagina = []
+
+            # Convertir impuestos a formato JSON
+            lista_impuestos = []
+            for impuesto in impuestos_pagina:
+                datos_impuesto = {
+                    'id_impuesto': impuesto.id_impuesto,
+                    'nombre': impuesto.nombre,
+                    'porcentaje': str(impuesto.porcentaje),
+                }
+                lista_impuestos.append(datos_impuesto)
+
+            return JsonResponse({'impuestos': lista_impuestos, 'total': paginator.count}, safe=False)
+
+        except Exception as e:
+            # Manejar errores aquí
+            return JsonResponse({'error': str(e)}, status=500)
+
+class ListarProductos(View):
+      def get(self, request, *args, **kwargs):
+        try:
+            # Parámetros de paginación y búsqueda
+            page = int(request.GET.get('page', 1))
             size = int(request.GET.get('size', 10))
             search = request.GET.get('search', '')
 
             # Filtrar productos por término de búsqueda
-            productos = Producto.objects.filter(nombreproducto__icontains=search,sestado=1)
+            productos = Producto.objects.filter(nombreproducto__icontains=search, sestado=1)
 
             # Configurar la paginación
             paginator = Paginator(productos, size)
@@ -1164,8 +1217,8 @@ class ListarProductos(View):
 
             # Convertir productos a formato JSON
             lista_productos = []
-            lista_horario = []
             for producto in productos_pagina:
+                # Procesar la imagen
                 imagen_base64 = None
                 if producto.imagenp:
                     try:
@@ -1173,74 +1226,57 @@ class ListarProductos(View):
                         imagen_base64 = base64.b64encode(byteImg).decode('utf-8')
                     except Exception as img_error:
                         print(f"Error al procesar imagen: {str(img_error)}")
-                # horariosz = HorarioProducto.objects.filter(id_producto=producto.id_producto)
-                # for horarioss in horariosz:
-                #     datos_horario = {
-                #         'id_horarioproducto': horarioss.id_horarioproducto,
-                #         'id_horarios': horarioss.id_horarios.id_horarios,  # Cambiado para obtener el campo deseado
-                #         'id_sucursal': horarioss.id_sucursal.id_sucursal,
-                #     }
-                #     lista_horario.append(datos_horario)
+                
+                # Obtener los impuestos asociados al producto
+                impuestos = producto.productoimpuestos_set.select_related('id_impuesto')
+                impuestos_detalle = [
+                    {'id_impuesto': impuesto.id_impuesto.id_impuesto,
+                     'nombre': impuesto.id_impuesto.nombre,
+                     'porcentaje': str(impuesto.id_impuesto.porcentaje)}
+                    for impuesto in impuestos
+                ]
+
+                # Verificar si tiene ensamble
                 ensambleexi = EnsambleProducto.objects.filter(id_producto=producto)
-                if (ensambleexi.exists()):
-                    ensamble=EnsambleProducto.objects.get(id_producto=producto)
-                    detallesensamble=DetalleEnsambleProducto.objects.filter(id_emsamblep=ensamble)
-                    lista_detalle = []
-                    for detalle in detallesensamble:
-                        hijo={
-                            'id':detalle.id_componentehijo.id_componente,
-                            'nombre':detalle.id_componentehijo.nombre
-                        }
-                        um={
-                            'id':detalle.id_umhijo.idum,
-                            'nombre':detalle.id_umhijo.nombreum
-                        }
-                        ensamble_data = {
-                            'id_componentehijo':hijo,
+                if ensambleexi.exists():
+                    ensamble = EnsambleProducto.objects.get(id_producto=producto)
+                    detallesensamble = DetalleEnsambleProducto.objects.filter(id_emsamblep=ensamble)
+                    lista_detalle = [
+                        {
+                            'id_componentehijo': {
+                                'id': detalle.id_componentehijo.id_componente,
+                                'nombre': detalle.id_componentehijo.nombre,
+                            },
                             'cantidadhijo': detalle.cantidadhijo,
-                            'um':um
-                        }
-                        lista_detalle.append(ensamble_data)
-                    compdata={
-                        'padrecant':ensamble.padrecantidad,
-                        'detalle':lista_detalle
+                            'um': {
+                                'id': detalle.id_umhijo.idum,
+                                'nombre': detalle.id_umhijo.nombreum,
+                            },
+                        } for detalle in detallesensamble
+                    ]
+                    compdata = {
+                        'padrecant': ensamble.padrecantidad,
+                        'detalle': lista_detalle,
                     }
-                    datos_producto = {
-                        'id_producto': producto.id_producto,
-                        'id_categoria': producto.id_categoria.id_categoria,
-                        'id_um': producto.id_um.idum,
-                        'puntosp': producto.puntosp,
-                        'codprincipal': producto.codprincipal,
-                        'nombreproducto': producto.nombreproducto,
-                        'descripcionproducto': producto.descripcionproducto,
-                        'preciounitario': str(producto.preciounitario),
-                        'iva': producto.iva,
-                        'ice': producto.ice,
-                        'irbpnr': producto.irbpnr,
-                        'horarios': lista_horario,
-                        'imagenp': imagen_base64,
-                        'detalle':compdata,
-                    }
-                    lista_horario = []
-                    lista_productos.append(datos_producto)
                 else:
-                    datos_producto = {
-                        'id_producto': producto.id_producto,
-                        'id_categoria': producto.id_categoria.id_categoria,
-                        'id_um': producto.id_um.idum,
-                        'puntosp': producto.puntosp,
-                        'codprincipal': producto.codprincipal,
-                        'nombreproducto': producto.nombreproducto,
-                        'descripcionproducto': producto.descripcionproducto,
-                        'preciounitario': str(producto.preciounitario),
-                        'iva': producto.iva,
-                        'ice': producto.ice,
-                        'irbpnr': producto.irbpnr,
-                        'horarios': lista_horario,
-                        'imagenp': imagen_base64,
-                    }
-                    lista_horario = []
-                    lista_productos.append(datos_producto)
+                    compdata = None
+
+                # Agregar datos del producto
+                datos_producto = {
+                    'id_producto': producto.id_producto,
+                    'id_categoria': producto.id_categoria.id_categoria,
+                    'id_um': producto.id_um.idum,
+                    'puntosp': producto.puntosp,
+                    'codprincipal': producto.codprincipal,
+                    'nombreproducto': producto.nombreproducto,
+                    'descripcionproducto': producto.descripcionproducto,
+                    'preciounitario': str(producto.preciounitario),
+                    'impuestos': impuestos_detalle,
+                    'imagenp': imagen_base64,
+                    'detalle': compdata,
+                }
+                lista_productos.append(datos_producto)
+
             return JsonResponse({'productos': lista_productos, 'total': paginator.count}, safe=False)
 
         except Exception as e:
