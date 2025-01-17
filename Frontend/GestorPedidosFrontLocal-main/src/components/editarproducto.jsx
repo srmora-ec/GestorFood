@@ -264,7 +264,7 @@ const EditarProducto = () => {
 
     const handlePageChange = (page) => {
         setCurrentPage(page);
-        fetchproducto(page); // Llama a la función fetchproducto con la nueva página
+        fetchproducto(page); 
     };
 
     const handleEditClick = (productId) => {
@@ -378,7 +378,6 @@ const EditarProducto = () => {
     };
 
     const showModalContent = (producto) => {
-        // Establece dinámicamente los valores del formulario cuando se abre el modal
         form.setFieldsValue({
             nombreproducto: producto.nombreproducto,
             descripcionproducto: producto.descripcionproducto,
@@ -526,180 +525,9 @@ const EditarProducto = () => {
                                     onDelete={eliminarp}
                                     categoriaList={categoriaList}
                                 />
-{/* 
-                                {productos.map((producto) => (
-                                    <Col xs={24} sm={6} md={5} lg={3}>
-                                        <Card
-                                            key={producto.id_producto}
-                                            hoverable
-                                            style={{
-                                                width: '100%', backgroundColor: '#CAF0EF', border: '1px solid #A4A4A4', marginTop: '5%',
-                                                height: '92%', margin: '16px', marginLeft: '1px',
-                                            }}
-                                            cover={
-                                                producto.imagenp ? (
-                                                    <>
-                                                        <img alt={producto.nombreproducto} src={`data:image/png;base64,${producto.imagenp}`} height={'300px'} />
-                                                        <Row align="right">
-                                                            <Col md={8} />
-                                                            <Col md={4}>
-                                                                <Row align="right">
-                                                                    <Col md={5}>
-                                                                        <Tooltip title='Editar producto'>
-                                                                            <Button
-                                                                                icon={<EditFilled />}
-                                                                                onClick={() => handleEditClick(producto)}
-                                                                            >
-                                                                            </Button>
-                                                                        </Tooltip>
-                                                                    </Col>
-                                                                    <Col md={1}>
-                                                                        <Tooltip title='Horarios de atención'>
-                                                                            <Button
-                                                                                icon={<CalendarTwoTone />}
-                                                                                onClick={() => viewadminH(producto)}
-                                                                            >
-                                                                            </Button>
-                                                                        </Tooltip>
-                                                                    </Col>
-                                                                    <Col md={4}>
-                                                                        <Tooltip
-                                                                            title='Ver componente'
-                                                                            overlayStyle={{ width: 300 }}
-                                                                        >
-                                                                            {producto.detalle && (
-                                                                                <Popover title={<Tag color="#000000">Ensamble de componente:</Tag>} trigger="click"
-                                                                                    content={
-                                                                                        <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
-                                                                                            <p>Generado por ensamble: {producto.detalle.padrecant}</p>
-                                                                                            <hr />
-                                                                                            {producto.detalle.detalle.map((detalleItem, index) => (
-                                                                                                <div key={index}>
-                                                                                                    <Tag color="#55971A">{detalleItem.id_componentehijo.nombre}</Tag>
-                                                                                                    <p>Cantidad: {detalleItem.cantidadhijo}</p>
-                                                                                                    <p>Unidad de Medida: {detalleItem.um.nombre}</p>
-                                                                                                    <hr />
-                                                                                                </div>
-                                                                                            ))}
-                                                                                        </div>
-                                                                                    }>
-                                                                                    <Button icon={<EyeOutlined />} />
-                                                                                </Popover>
-                                                                            )}
-
-                                                                        </Tooltip>
-                                                                    </Col >
-                                                                    <Col md={4}>
-                                                                        <Popconfirm
-                                                                            title="Eliminar este producto"
-                                                                            description="¿Estás seguro que deseas eliminar el producto"
-                                                                            onConfirm={() => eliminarp(producto.id_producto)}
-                                                                            onCancel={'cancel'}
-                                                                            okText="Yes"
-                                                                            cancelText="No"
-                                                                        >
-                                                                            <Button
-                                                                                icon={<DeleteFilled />}
-                                                                            />
-                                                                        </Popconfirm>
-                                                                    </Col>
-                                                                </Row>
-
-                                                            </Col>
-                                                        </Row>
-                                                    </>
-                                                ) : (
-                                                    <>
-                                                        <Watermark content={[producto.nombreproducto, 'Sin imagen']}>
-                                                            <div style={{ width: '100%', height: '300px', overflow: 'hidden', backgroundColor: '#ffff', borderLeft: '1px solid  #A4A4A4', borderRight: ' 1px solid  #A4A4A4' }} />
-                                                        </Watermark>
-                                                        <Row align="right">
-                                                            <Col md={8} />
-                                                            <Col md={4}>
-                                                                <Row align="right">
-                                                                    <Col md={5}>
-                                                                        <Tooltip title='Editar producto'>
-                                                                            <Button
-                                                                                icon={<EditFilled />}
-                                                                                onClick={() => handleEditClick(producto)}
-                                                                            >
-                                                                            </Button>
-                                                                        </Tooltip>
-                                                                    </Col>
-                                                                    <Col md={1}>
-                                                                        <Tooltip title='Horarios de atención'>
-                                                                            <Button
-                                                                                icon={<CalendarTwoTone />}
-                                                                                onClick={() => viewadminH(producto)}
-                                                                            >
-                                                                            </Button>
-                                                                        </Tooltip>
-                                                                    </Col>
-                                                                    <Col md={4}>
-                                                                        <Tooltip
-                                                                            title='Ver componente'
-                                                                            overlayStyle={{ width: 300 }}
-                                                                        >
-                                                                            {producto.detalle && (
-                                                                                <Popover title={<Tag color="#000000">Ensamble de componente:</Tag>} trigger="click"
-                                                                                    content={
-                                                                                        <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
-                                                                                            <p>Generado por ensamble: {producto.detalle.padrecant}</p>
-                                                                                            <hr />
-                                                                                            {producto.detalle.detalle.map((detalleItem, index) => (
-                                                                                                <div key={index}>
-                                                                                                    <Tag color="#55971A">{detalleItem.id_componentehijo.nombre}</Tag>
-                                                                                                    <p>Cantidad: {detalleItem.cantidadhijo}</p>
-                                                                                                    <p>Unidad de Medida: {detalleItem.um.nombre}</p>
-                                                                                                    <hr />
-                                                                                                </div>
-                                                                                            ))}
-                                                                                        </div>
-                                                                                    }>
-                                                                                    <Button icon={<EyeOutlined />} />
-                                                                                </Popover>
-                                                                            )}
-
-                                                                        </Tooltip>
-                                                                    </Col >
-                                                                    <Col md={4}>
-                                                                        <Popconfirm
-                                                                            title="Eliminar este producto"
-                                                                            description="¿Estás seguro que deseas eliminar el producto"
-                                                                            onConfirm={() => eliminarp(producto.id_producto)}
-                                                                            onCancel={'cancel'}
-                                                                            okText="Yes"
-                                                                            cancelText="No"
-                                                                        >
-                                                                            <Button
-                                                                                icon={<DeleteFilled />}
-                                                                            />
-                                                                        </Popconfirm>
-                                                                    </Col>
-                                                                </Row>
-
-                                                            </Col>
-                                                        </Row>
-                                                    </>
-                                                )
-
-
-                                            }
-
-                                        >
-                                            <Meta title={producto.nombreproducto} description={producto.descripcionproducto} />
-                                            <Tooltip title={"Puntos de " + producto.nombreproducto}>
-                                                <Badge count={producto.puntosp} showZero color='#faad14' />
-                                            </Tooltip>
-                                            <Tooltip title={"Precio de " + producto.nombreproducto}>
-                                                <Badge count={'$' + producto.preciounitario} showZero color='#06CE15' style={{ margin: '10px' }} />
-                                            </Tooltip>
-                                            <Tooltip title={"Categoría de " + producto.nombreproducto}>
-                                                <Badge count={getCategoriaNombre(producto.id_categoria)} showZero color='#CE6F04' />
-                                            </Tooltip>
-                                        </Card>
-                                    </Col>
-                                ))} */}
+{
+    
+}
 
                             </Row>
                             {/* <Pagination current={currentPage} total={20} onChange={handlePageChange} pageSize={10} style={{ marginTop: '16px', textAlign: 'center' }} /> */}

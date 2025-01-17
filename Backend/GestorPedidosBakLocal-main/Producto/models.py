@@ -60,17 +60,23 @@ class Producto(models.Model):
 
         # Recuperar los impuestos asociados al producto
         for relacion in self.productoimpuestos_set.all():
-            impuesto = relacion.impuesto
+            impuesto = relacion.id_impuesto
             impuesto_calculado = precio_base * (impuesto.porcentaje / Decimal(100))
             impuestos[impuesto.nombre] = round(impuesto_calculado, 2)
             total_impuestos += impuesto_calculado
-        
+
+        # Si no hay impuestos, asignar "0"
+        if not impuestos:
+            total_impuestos = Decimal(0)
+
         # Calcular precio final
         precio_final = precio_base + total_impuestos
         return {
             'impuestos_detalle': impuestos,
+            'total_impuestos': round(total_impuestos, 2),
             'precio_final': round(precio_final, 2)
         }
+
 
 class ProductoImpuestos(models.Model):
     id_producto = models.ForeignKey(Producto, on_delete=models.CASCADE, db_column='id_producto')

@@ -4,12 +4,14 @@ import API_URL from '../config';
 
 const CarritoCliente = ({ carrito, setCarrito, visible, onClose }) => {
     const total = Object.values(carrito).reduce((acc, producto) => {
+        return acc + (producto.precio_unitario ) * producto.cantidad;
+    }, 0);
+
+    const subtotal = Object.values(carrito).reduce((acc, producto) => {
         const impuestoTotal = (
-            parseFloat(producto.impuesto?.ice || 0) +
-            parseFloat(producto.impuesto?.irbpnr || 0) +
-            parseFloat(producto.impuesto?.iva || 0)
+            parseFloat(producto.impuesto?.total_impuestos || 0)
         );
-        return acc + (producto.precio_unitario + impuestoTotal) * producto.cantidad;
+        return acc + (impuestoTotal) * producto.cantidad;
     }, 0);
 
     const actualizarCantidad = (productoId, incremento) => {
@@ -72,10 +74,10 @@ const CarritoCliente = ({ carrito, setCarrito, visible, onClose }) => {
             footer={
                 <div>
                     <div style={{ marginBottom: '8px' }}>
-                        <strong>Subtotal:</strong> ${(total * 0.9).toFixed(2)}
+                        <strong>Subtotal:</strong> ${(total).toFixed(2)}
                     </div>
                     <div style={{ marginBottom: '8px' }}>
-                        <strong>Impuestos:</strong> ${(total * 0.1).toFixed(2)}
+                        <strong>Impuestos:</strong> ${(subtotal).toFixed(2)}
                     </div>
                     <div style={{ marginBottom: '16px' }}>
                         <strong>Total:</strong>
@@ -129,11 +131,7 @@ const CarritoCliente = ({ carrito, setCarrito, visible, onClose }) => {
                                         <h5>{producto.nombre_producto}</h5>
                                         <p style={{ fontWeight: 'bold' }}>
                                             $
-                                            {(producto.precio_unitario + (
-                                                parseFloat(producto.impuesto?.ice || 0) +
-                                                parseFloat(producto.impuesto?.irbpnr || 0) +
-                                                parseFloat(producto.impuesto?.iva || 0)
-                                            )).toFixed(2)}
+                                            {(producto.precio_unitario).toFixed(2)}
                                         </p>
                                         <div style={{ display: 'flex', alignItems: 'center' }}>
                                             <button

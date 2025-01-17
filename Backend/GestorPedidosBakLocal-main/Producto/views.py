@@ -553,7 +553,8 @@ class ListaCategoriasConProductos(View):
             return JsonResponse({'mensaje': resultado})
         
         except Exception as e:
-            return JsonResponse({'error': str(e)}, status=400)#----------editar--------------------------
+            return JsonResponse({'error': str(e)}, status=400)
+#----------editar--------------------------
 
 
 @method_decorator(csrf_exempt, name='dispatch')
